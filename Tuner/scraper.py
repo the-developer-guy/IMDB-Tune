@@ -30,6 +30,7 @@ def get_movies(url="https://www.imdb.com/chart/top/"):
             .find("a").contents[0]
         movie_model["link"] = movie_entry.find("a")["href"]
         movie_model["rating"] = get_rating_from_tag(movie_entry)
-        movie_model["oscar_count"] = 0
+        movie_model["adjusted rating"] = movie_model["rating"][0]
+        movie_model["oscar count"] = 0
         movies_list.append(movie_model)
     return movies_list
