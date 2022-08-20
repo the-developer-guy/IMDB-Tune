@@ -1,5 +1,5 @@
 def rating_penalizer(movie, top_rating_count):
-    review_count_difference = top_rating_count - movie["rating"][1]
+    review_count_difference = top_rating_count - movie["rating count"]
     if review_count_difference > 0:
         penalty = review_count_difference // 100000
         movie["adjusted rating"] -= penalty * 0.1
