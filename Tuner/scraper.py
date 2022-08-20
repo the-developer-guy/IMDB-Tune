@@ -2,9 +2,15 @@
 IMDB scraper
 """
 
+import re
 import urllib.request
 from bs4 import BeautifulSoup
 
+def get_page(url):
+    response = urllib.request.urlopen(url)
+    page = response.read().decode('UTF-8')
+    tags = BeautifulSoup(page, 'html.parser')
+    return tags
 
 def get_rating_from_tag(tag):
     rating_tag = tag.find(class_="imdbRating")
@@ -15,12 +21,19 @@ def get_rating_from_tag(tag):
     rating_count = int(parts[3].replace(",", ""))
     return rating_value, rating_count
 
+def get_oscar_count(url):
+    movie = get_page(url)
+    tags = movie.find_all("a")
+    for tag in tags:
+        oscar_string = re.search("Won \d+ Oscar", str(tag.contents[0]))
+        if oscar_string != None:
+            oscar_string_parts = oscar_string.group().split(" ")
+            return int(oscar_string_parts[1])
+    return 0
+
 
 def get_movies(url="https://www.imdb.com/chart/top/"):
-    response = urllib.request.urlopen(url)
-    imdb_page = response.read().decode('UTF-8')
-    movies = BeautifulSoup(imdb_page, 'html.parser')
-
+    movies = get_page(url)
     movies_table = movies.find(class_="lister-list")
     movies_list = []
     for movie_entry in movies_table.find_all("tr"):
@@ -31,6 +44,6 @@ def get_movies(url="https://www.imdb.com/chart/top/"):
         movie_model["link"] = movie_entry.find("a")["href"]
         movie_model["rating"] = get_rating_from_tag(movie_entry)
         movie_model["adjusted rating"] = movie_model["rating"][0]
-        movie_model["oscar count"] = 0
+        movie_model["oscar count"] = get_oscar_count(f"https://www.imdb.com/{movie_model['link']}")
         movies_list.append(movie_model)
     return movies_list
