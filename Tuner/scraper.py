@@ -32,7 +32,7 @@ def get_oscar_count(url):
     return 0
 
 
-def get_movies(url="https://www.imdb.com/chart/top/"):
+def get_movies(url="https://www.imdb.com/chart/top/", limit=20):
     movies = get_page(url)
     movies_table = movies.find(class_="lister-list")
     movies_list = []
@@ -46,4 +46,6 @@ def get_movies(url="https://www.imdb.com/chart/top/"):
         movie_model["adjusted rating"] = movie_model["rating"][0]
         movie_model["oscar count"] = get_oscar_count(f"https://www.imdb.com/{movie_model['link']}")
         movies_list.append(movie_model)
+        if len(movies_list) >= limit:
+            break
     return movies_list
