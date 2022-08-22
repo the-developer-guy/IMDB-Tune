@@ -2,6 +2,7 @@
 IMDB scraper
 """
 
+from concurrent.futures import ThreadPoolExecutor
 import re
 import urllib.request
 from bs4 import BeautifulSoup
@@ -44,13 +45,19 @@ def get_movies(url="https://www.imdb.com/chart/top/", limit=20):
         movie_model["title"] = movie_entry\
             .find(class_="titleColumn")\
             .find("a").contents[0]
-        movie_model["link"] = movie_entry.find("a")["href"]
+        movie_model["link"] = f"https://www.imdb.com/{movie_entry.find('a')['href']}"
         rating = get_rating_from_tag(movie_entry)
         movie_model["rating"] = rating[0]
         movie_model["rating count"] = rating[1]
         movie_model["adjusted rating"] = movie_model["rating"]
-        movie_model["oscar count"] = get_oscar_count(f"https://www.imdb.com/{movie_model['link']}")
         movies_list.append(movie_model)
         if len(movies_list) >= limit:
             break
+    links = [movie["link"] for movie in movies_list]
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        oscars = executor.map(get_oscar_count, links)
+        i = 0
+        for oscar in oscars:
+            movies_list[i]["oscar count"] = oscar
+            i += 1
     return movies_list
