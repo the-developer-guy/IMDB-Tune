@@ -10,6 +10,6 @@ for i in range(20):
         max_review_count = actual_review_count
 
 for movie in movies:
-    oscar_calculator(movie)
-    rating_penalizer(movie, max_review_count)
+    movie["adjusted rating"] += oscar_calculator(movie["oscar count"])
+    movie["adjusted rating"] -= rating_penalizer(movie["rating count"], max_review_count)
     print(f"Movie name: {movie['title']} rating: {movie['rating']:.1f} adjusted: {movie['adjusted rating']:.1f} rating count: {movie['rating count']}")
